@@ -1,73 +1,59 @@
-// frontend/src/ClientPayment.tsx
-import React, { useState } from "react";
+// Frontend: React with Tailwind CSS
+import { useState } from "react";
+import { Switch } from "@/components/ui/switch"; // ✅ Make sure this import path matches your component structure
+import { Button } from "@/components/ui/button";
 
-export default function ClientPayment() {
-  const [insuranceEnabled, setInsuranceEnabled] = useState(true);
-  const amount = 5000;
+export default function ClientInsurancePage() {
+  const [amount, setAmount] = useState(0);
+  const [insuranceEnabled, setInsuranceEnabled] = useState(false);
+
   const insuranceFee = amount * 0.02;
 
-  // Simulated risk level — you can replace this with a backend API call
-  const riskScore = amount > 10000 ? "High" : "Low";
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount,
+          insured: insuranceEnabled,
+          insurance_fee: insuranceFee,
+        }),
+      });
+      const data = await response.json();
+      alert("Payment submitted: " + JSON.stringify(data));
+    } catch (err) {
+      alert("Error submitting payment");
+      console.error(err);
+    }
+  };
 
   return (
-    <div
-      className="payment-container"
-      style={{
-        maxWidth: 400,
-        margin: "auto",
-        padding: 20,
-        fontFamily: "Arial, sans-serif",
-        border: "1px solid #ccc",
-        borderRadius: 10,
-        marginTop: 40,
-      }}
-    >
-      <h3 style={{ marginBottom: 20 }}>Secure Payment Insurance</h3>
+    <div className="p-6 max-w-md mx-auto">
+      <h2 className="text-2xl font-semibold mb-4">Secure Your Payment</h2>
 
-      <p>
-        <strong>Amount:</strong> R{amount.toFixed(2)}
-      </p>
+      <label className="block mb-2 text-sm">Enter Amount (ZAR):</label>
+      <input
+        type="number"
+        className="border border-gray-300 p-2 rounded w-full mb-4"
+        value={amount}
+        onChange={(e) => setAmount(parseFloat(e.target.value))}
+      />
 
-      <label style={{ display: "block", marginTop: 15 }}>
-        <input
-          type="checkbox"
+      <div className="flex items-center justify-between mb-4">
+        <label className="text-sm">Add 2% insurance (R{insuranceFee.toFixed(2)})</label>
+        <Switch
           checked={insuranceEnabled}
-          onChange={(e) => setInsuranceEnabled(e.target.checked)}
-        />{" "}
-        Add 2% insurance (R{insuranceFee.toFixed(2)})
-      </label>
+          onCheckedChange={setInsuranceEnabled}
+        />
+      </div>
 
-      {insuranceEnabled && (
-        <p style={{ marginTop: 10, fontSize: 14, color: "#555" }}>
-          If your money is lost due to fraud or scam, the payment will be insured and you will be reimbursed up to the insured amount.
-        </p>
-      )}
-
-      <p style={{ marginTop: 20 }}>
-        <strong>Risk Level:</strong>{" "}
-        <span
-          style={{
-            color: riskScore === "High" ? "red" : "green",
-            fontWeight: "bold",
-          }}
-        >
-          {riskScore}
-        </span>
-      </p>
-
-      <button
-        style={{
-          marginTop: 20,
-          padding: "10px 20px",
-          backgroundColor: "#007bff",
-          color: "white",
-          border: "none",
-          borderRadius: 5,
-          cursor: "pointer",
-        }}
-      >
-        Proceed to Pay
-      </button>
+      <Button onClick={handleSubmit} className="w-full">
+        Pay Now
+      </Button>
     </div>
   );
 }
+
