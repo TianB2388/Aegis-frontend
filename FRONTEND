@@ -1,53 +1,42 @@
-import { useState } from "react";
-import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { useState } from "react";
 
-export default function SafePayClient() {
-  const [insuranceEnabled, setInsuranceEnabled] = useState(false);
-  const [amount, setAmount] = useState(0);
+export default function AegisClientPortal() {
+  const [insuranceEnabled, setInsuranceEnabled] = useState(true);
+  const [paymentAmount, setPaymentAmount] = useState(0);
+
+  const insuranceFee = paymentAmount * 0.02;
 
   const handleToggleInsurance = (enabled: boolean) => {
     setInsuranceEnabled(enabled);
   };
 
-  const handleSubmit = async () => {
-    const payload = {
-      transaction_id: `TX-${Date.now()}`,
-      amount: amount,
-      insured: insuranceEnabled,
-      insurance_fee: (amount * 0.02).toFixed(2),
-    };
-
-    const res = await fetch("http://localhost:5000/api/insure", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await res.json();
-    console.log("Server response:", data);
-    alert("Payment protected successfully.");
-  };
-
   return (
-    <div className="max-w-md mx-auto p-6">
-      <Card>
-        <CardContent className="p-4">
-          <h2 className="text-lg font-semibold mb-4">Protect Your Payment</h2>
+    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-gray-50">
+      <Card className="w-full max-w-md">
+        <CardContent className="p-6">
+          <h2 className="text-2xl font-semibold mb-4 text-center">Aegis Insurance Option</h2>
 
-          <label className="text-sm block mb-2">Enter Payment Amount (R)</label>
-          <input
-            type="number"
-            className="border rounded-md px-3 py-2 w-full mb-4"
-            placeholder="e.g. 5000"
-            onChange={(e) => setAmount(Number(e.target.value))}
-            onFocus={(e) => e.target.select()}
-            value={amount === 0 ? "" : amount}
-          />
+          <div className="mb-4">
+            <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+              Enter Payment Amount (R)
+            </label>
+            <input
+              id="amount"
+              type="number"
+              value={paymentAmount === 0 ? "" : paymentAmount}
+              onChange={(e) => setPaymentAmount(Number(e.target.value))}
+              placeholder="e.g. 1000"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
 
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-medium">Add Aegis Insurance (2%)</span>
+          <div className="flex items-center justify-between mb-2">
+            <label htmlFor="insurance" className="text-sm font-medium text-gray-800">
+              Enable Aegis Protection (2%)
+            </label>
             <Switch
               id="insurance"
               checked={insuranceEnabled}
@@ -55,15 +44,19 @@ export default function SafePayClient() {
             />
           </div>
 
-          {insuranceEnabled && (
-            <div className="text-xs text-muted-foreground mb-4">
-              <p>Total Fee: R{(amount * 0.02).toFixed(2)}</p>
-            </div>
+          {insuranceEnabled && paymentAmount > 0 && (
+            <p className="text-sm text-blue-600 mt-2">
+              Aegis will cover up to R{paymentAmount.toFixed(2)}. Premium: R{insuranceFee.toFixed(2)}
+            </p>
           )}
 
-          <Button onClick={handleSubmit} className="w-full">
-            Proceed to Payment
-          </Button>
+          {!insuranceEnabled && paymentAmount > 0 && (
+            <p className="text-sm text-gray-500 mt-2">
+              You are proceeding without Aegis protection.
+            </p>
+          )}
+
+          <Button className="w-full mt-6">Continue Payment</Button>
         </CardContent>
       </Card>
     </div>
