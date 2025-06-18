@@ -1,64 +1,54 @@
-// --- Frontend (AegisClientPortal.tsx) ---
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
 export default function AegisClientPortal() {
-  const [insuranceEnabled, setInsuranceEnabled] = useState(true);
-  const [paymentAmount, setPaymentAmount] = useState(0);
+  const [insuranceEnabled, setInsuranceEnabled] = useState(false);
+  const [amount, setAmount] = useState("");
 
-  const insuranceFee = paymentAmount * 0.02;
+  const parsedAmount = parseFloat(amount) || 0;
+  const insuranceFee = parsedAmount * 0.02;
 
-  const handleToggleInsurance = (enabled: boolean) => {
-    setInsuranceEnabled(enabled);
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value.replace(/^0+(?!\.)/, "");
+    setAmount(input);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-gray-50">
-      <Card className="w-full max-w-md">
-        <CardContent className="p-6">
-          <h2 className="text-2xl font-semibold mb-4 text-center">Aegis Insurance Option</h2>
+    <div className="p-6 max-w-md mx-auto space-y-4">
+      <Card>
+        <CardContent className="space-y-4">
+          <h2 className="text-lg font-semibold">Aegis Payment Insurance</h2>
 
-          <div className="mb-4">
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-              Enter Payment Amount (R)
-            </label>
-            <input
-              id="amount"
+          <div>
+            <label className="block text-sm mb-1">Enter Payment Amount</label>
+            <Input
               type="number"
-              value={paymentAmount === 0 ? "" : paymentAmount}
-              onChange={(e) => setPaymentAmount(Number(e.target.value))}
-              placeholder="e.g. 1000"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="e.g. 2500"
+              value={amount}
+              onChange={handleAmountChange}
+              className="w-full"
+              min="0"
             />
           </div>
 
-          <div className="flex items-center justify-between mb-2">
-            <label htmlFor="insurance" className="text-sm font-medium text-gray-800">
-              Enable Aegis Protection (2%)
-            </label>
+          <div className="flex items-center justify-between">
+            <span className="text-sm">Add 2% Aegis Insurance</span>
             <Switch
-              id="insurance"
               checked={insuranceEnabled}
-              onCheckedChange={handleToggleInsurance}
+              onCheckedChange={setInsuranceEnabled}
             />
           </div>
 
-          {insuranceEnabled && paymentAmount > 0 && (
-            <p className="text-sm text-blue-600 mt-2">
-              Aegis will cover up to R{paymentAmount.toFixed(2)}. Premium: R{insuranceFee.toFixed(2)}
-            </p>
+          {insuranceEnabled && (
+            <div className="text-xs text-muted-foreground">
+              Insurance Fee: <strong>R{insuranceFee.toFixed(2)}</strong>
+            </div>
           )}
 
-          {!insuranceEnabled && paymentAmount > 0 && (
-            <p className="text-sm text-gray-500 mt-2">
-              You are proceeding without Aegis protection.
-            </p>
-          )}
-
-          <Button className="w-full mt-6">Continue Payment</Button>
+          <Button disabled={!parsedAmount}>Proceed to Payment</Button>
         </CardContent>
       </Card>
     </div>
